@@ -1,7 +1,9 @@
 package com.example.controller;
 
-import com.example.model.User;
+import com.example.dto.UserRequestDTO;
+import com.example.dto.UserResponseDTO;
 import com.example.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,25 +19,26 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping(produces = "application/json", consumes = "application/json")
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        return ResponseEntity.ok(userService.createUser(user));
+    @PostMapping
+    public ResponseEntity<UserResponseDTO> createUser(@Valid @RequestBody UserRequestDTO userDTO) {
+        return ResponseEntity.ok(userService.createUser(userDTO));
     }
 
-    @GetMapping(produces = "application/json")
-    public ResponseEntity<List<User>> getUsers() {
+    @GetMapping
+    public ResponseEntity<List<UserResponseDTO>> getUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
 
-    @GetMapping(value = "/{id}", produces = "application/json")
-    public ResponseEntity<User> getUser(@PathVariable Long id) {
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> getUser(@PathVariable Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
-    @PutMapping(value = "/{id}", produces = "application/json", consumes = "application/json")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        user.setId(id);
-        return ResponseEntity.ok(userService.updateUser(user));
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponseDTO> updateUser(
+            @PathVariable Long id,
+            @Valid @RequestBody UserRequestDTO userDTO) {
+        return ResponseEntity.ok(userService.updateUser(id, userDTO));
     }
 
     @DeleteMapping("/{id}")

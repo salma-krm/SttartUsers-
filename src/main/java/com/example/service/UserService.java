@@ -1,5 +1,8 @@
 package com.example.service;
 
+import com.example.dto.UserRequestDTO;
+import com.example.dto.UserResponseDTO;
+import com.example.mapper.UserMapper;
 import com.example.model.User;
 import com.example.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -12,28 +15,44 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, UserMapper userMapper) {
         this.userRepository = userRepository;
+        this.userMapper = userMapper;
     }
 
-    public User createUser(User user) {
-        if (userRepository.existsByEmail(user.getEmail())) {
+    public UserResponseDTO createUser(UserRequestDTO userDTO) {
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new RuntimeException("Email already exists");
         }
-        return userRepository.save(user);
+        User user = userMapper.toEntity(userDTO);
+        return userMapper.toDto(userRepository.save(user));
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponseDTO> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(userMapper::toDto)
+                .toList();
     }
 
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+    public UserResponseDTO getUserById(Long id) {
+        return userRepository.findById(id)
+                .map(userMapper::toDto)
+                .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
-    public User updateUser(User user) {
-        return userRepository.save(user);
+    public UserResponseDTO updateUser(Long id, UserRequestDTO userDTO) {
+        User existing = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        existing.setName(userDTO.getName());
+        existing.setEmail(userDTO.getEmail());
+        existing.setPassword(userDTO.getPassword());
+        existing.setRole(userDTO.getRole());
+
+        return userMapper.toDto(userRepository.save(existing));
     }
 
     public void deleteUser(Long id) {
