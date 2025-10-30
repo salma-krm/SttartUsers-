@@ -3,21 +3,32 @@ package com.example.mapper;
 import com.example.dto.UserRequestDTO;
 import com.example.dto.UserResponseDTO;
 import com.example.model.User;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.factory.Mappers;
 
-@Mapper(componentModel = "spring")
-public interface UserMapper {
+import java.time.LocalDateTime;
 
-    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
+public class UserMapper {
 
     // DTO → Entity
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", expression = "java(java.time.LocalDateTime.now())")
-    @Mapping(target = "active", constant = "true")
-    User toEntity(UserRequestDTO dto);
+    public User toEntity(UserRequestDTO dto) {
+        User user = new User();
+        user.setName(dto.getName());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
+        user.setRole(dto.getRole());
+        user.setActive(true);
+        user.setCreatedAt(LocalDateTime.now());
+        return user;
+    }
 
     // Entity → DTO
-    UserResponseDTO toDto(User user);
+    public UserResponseDTO toDto(User user) {
+        UserResponseDTO dto = new UserResponseDTO();
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setEmail(user.getEmail());
+        dto.setRole(user.getRole());
+        dto.setActive(user.getActive());
+        dto.setCreatedAt(user.getCreatedAt());
+        return dto;
+    }
 }
